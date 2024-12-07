@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trend Graph</title>
+    <style>
+        body {
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: linear-gradient(to bottom right, #000000, #434343);
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            width: 90%;
+            max-width: 800px;
+            padding: 20px;
+            border-radius: 10px;
+            background: rgba(0, 0, 0, 0.7);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+            margin-bottom: 2rem; /* Space between chart and back button */
+        }
+        canvas {
+            width: 100%;
+            height: auto;
+        }
+        .button {
+            padding: 1rem 3rem;
+            background-color: #7d7d7d; /* Grey color */
+            color: white;
+            font-size: 1.5rem;
+            border: 2px solid #7d7d7d; /* Grey border */
+            border-radius: 12px; /* Rounded edges */
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none; /* Remove underline */
+        }
+        .button:hover {
+            background-color: white; /* Turns to white on hover */
+            color: #7d7d7d; /* Text turns to grey */
+            border: 2px solid #7d7d7d; /* Border stays grey */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <canvas id="trendChart"></canvas>
+    </div>
+    <a href="/" class="button">Back to Home</a>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const ctx = document.getElementById('trendChart').getContext('2d');
+
+        // Initial chart setup
+        const chart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: Array.from({length: 20}, (_, i) => `Point ${i + 1}`),
+                datasets: [{
+                    label: 'AUD Balance Trend',
+                    data: [],
+                    borderColor: '#4e54c8',
+                    backgroundColor: 'rgba(78, 84, 200, 0.5)',
+                    borderWidth: 2,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: { display: false }
+                    },
+                    y: {
+                        ticks: { color: '#FFFFFF' },
+                        grid: { color: 'rgba(255, 255, 255, 0.1)' }
+                    }
+                }
+            }
+        });
+
+        // Function to fetch trend data and update chart
+        async function fetchTrendData() {
+            try {
+                const response = await fetch('/api/trend-data');
+                const trendData = await response.json();
+
+                // Update chart data and refresh the chart
+                chart.data.datasets[0].data = trendData;
+                chart.update();
+            } catch (error) {
+                console.error('Error fetching trend data:', error);
+            }
+        }
+
+        // Fetch data initially and then every 10 seconds
+        fetchTrendData();  // Initial fetch
+        setInterval(fetchTrendData, 10000);  // Fetch data every 10 seconds
+    </script>
+</body>
+</html>
